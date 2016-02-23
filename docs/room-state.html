@@ -140,7 +140,7 @@
     </div>
 -->
 
-    <p>Each room has its own state. The state is broadcasted to all connected clients<br>if the state changed since last broadcast.</p>
+    <p>Each room has its own state. A broadcast occurs every time the state changes,<br>notifying all connected clients of all patches occurred in the interval<br>specified.</p>
 <p><img src="http://www.gliffy.com/go/publish/image/10069469/L.png" alt="Room State Diagram"></p>
 <p>There’s two ways of dealing with the room state: using plain JavaScript objects,<br>or having a state handler class.</p>
 <h2 id="Plain-Object-State"><a href="#Plain-Object-State" class="headerlink" title="Plain Object State"></a>Plain Object State</h2><p>The simplest way to deal with the room state is using a plain JavaScript object.</p>
