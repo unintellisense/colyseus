@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>The Room State - Colyseus</title>
+        <meta charset="utf-8">
+        <meta name="description" content="Minimalistic Multiplayer Game Server for Node.js">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <link href='http://fonts.googleapis.com/css?family=Roboto Mono' rel='stylesheet' type='text/css'>
+        <link href="//cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css" rel='stylesheet' type='text/css'>
+        <link rel="icon" href="/colyseus/images/favicon.png" type="image/x-icon">
+        <script>
+            window.PAGE_TYPE = "documentation"
+        </script>
+        <link rel="stylesheet" href="/colyseus/css/page.css" type="text/css">
+        <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-67917511-5', 'auto');
+  ga('send', 'pageview');
+</script>
+
+    </head>
+    <body>
+        <div id="mobile-bar">
+            <a class="menu-button"></a>
+            <a class="logo" href="/"></a>
+        </div>
+        
+            <div id="header">
+    <a id="logo" href="/">      <img src="/colyseus/images/logo-black.png">
+    </a>
+    <ul id="nav">
+        <li>
+  <form id="search-form">
+    <input type="text" id="search-query" class="st-default-search-input">
+  </form>
+</li>
+<li><a href="/colyseus/docs" class="nav-link current">Documentation</a></li><li><a href="/colyseus/examples" class="nav-link">Examples</a></li><li><a href="/colyseus/blog" class="nav-link">Blog</a></li><li class="nav-dropdown-container">
+  <a class="nav-link">Community</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+    <li><a href="https://github.com/gamestdio/colyseus" class="nav-link" target="_blank">GitHub</a></li>
+
+    <!--
+    <li><a href="http://forum.vuejs.org" class="nav-link" target="_blank">Forum</a></li>
+    -->
+
+    <li><a href="https://gitter.im/gamestdio/colyseus" class="nav-link" target="_blank">Chat</a></li>
+  </ul>
+</li>
+
+
+    </ul>
+</div>
+
+            <div id="main">
+                
+                    
+    <div class="sidebar">
+    <ul class="main-menu">
+        <li>
+  <form id="search-form">
+    <input type="text" id="search-query" class="st-default-search-input">
+  </form>
+</li>
+<li><a href="/colyseus/docs" class="nav-link current">Documentation</a></li><li><a href="/colyseus/examples" class="nav-link">Examples</a></li><li><a href="/colyseus/blog" class="nav-link">Blog</a></li><li class="nav-dropdown-container">
+  <a class="nav-link">Community</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+    <li><a href="https://github.com/gamestdio/colyseus" class="nav-link" target="_blank">GitHub</a></li>
+
+    <!--
+    <li><a href="http://forum.vuejs.org" class="nav-link" target="_blank">Forum</a></li>
+    -->
+
+    <li><a href="https://gitter.im/gamestdio/colyseus" class="nav-link" target="_blank">Chat</a></li>
+  </ul>
+</li>
+
+
+    </ul>
+    <div class="list">
+        <h2>
+            Documentation
+
+            <!--
+            <select class="version-select">
+                <option selected>1.0</option>
+                <option>0.12</option>
+                <option>0.11</option>
+            </select>
+            -->
+
+        </h2>
+        <ul class="menu-root">
+            
+                <li>
+                    <a href="/colyseus/docs/index.html" class="sidebar-link">Getting Started</a>
+                </li>
+            
+                <li>
+                    <a href="/colyseus/docs/registering-rooms.html" class="sidebar-link">Registering rooms</a>
+                </li>
+            
+                <li>
+                    <a href="/colyseus/docs/match-making.html" class="sidebar-link">Match Making</a>
+                </li>
+            
+                <li>
+                    <a href="/colyseus/docs/room-state.html" class="sidebar-link current">The Room State</a>
+                </li>
+            
+                <li>
+                    <a href="/colyseus/docs/timing-events.html" class="sidebar-link">Timing Events</a>
+                </li>
+            
+        </ul>
+
+        <!--
+        <div id="donate">
+            <span class="wrapper" style="width: 110px">
+              <img src="/images/paypal.png">
+              <a href="https://www.paypal.me/evanyou" target="_blank">Buy Me Coffee</a>
+            </span>
+        </div>
+        -->
+
+    </div>
+</div>
+
+
+<div class="content documentation with-sidebar">
+    <h1>The Room State</h1>
+
+<!--
+    <div id="ad">
+    <script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?zoneid=1673&serve=C6AILKT&placement=vuejs" id="_carbonads_js"></script>
+    </div>
+-->
+
+    <p>Each room has its own state. The state is broadcasted to all connected clients<br>if the state changed since last broadcast.</p>
+<p><img src="http://www.gliffy.com/go/publish/image/10069469/L.png" alt="Room State Diagram"></p>
+<p>There’s two ways of dealing with the room state: using plain JavaScript objects,<br>or having a state handler class.</p>
+<h2 id="Plain-Object-State"><a href="#Plain-Object-State" class="headerlink" title="Plain Object State"></a>Plain Object State</h2><p>The simplest way to deal with the room state is using a plain JavaScript object.</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChatRoom</span> <span class="keyword">extends</span> <span class="title">Room</span> </span>&#123;</span><br><span class="line">  constructor(options) &#123;</span><br><span class="line">    <span class="keyword">super</span>(options, <span class="number">1000</span>) <span class="comment">// sync state every 1 second</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// use a plain object state, holding the room "messages".</span></span><br><span class="line">    <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">      messages: []</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  onMessage (client, data) &#123;</span><br><span class="line">    <span class="keyword">this</span>.state.messages.push(data.message)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Appling-patch-state"><a href="#Appling-patch-state" class="headerlink" title="Appling patch state"></a>Appling patch state</h2><p>At the client-side, on this example, a patch of the room state is sent every 1<br>second, if something changed since last patch.</p>
+<p>The patch state broadcasted by the server follows JSON Patch structure (<a href="http://tools.ietf.org/html/rfc6902" target="_blank" rel="external">RFC<br>6902</a>), which looks like this:</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">"op"</span>:<span class="string">"add"</span>,</span><br><span class="line">    <span class="string">"path"</span>:<span class="string">"/messages/1"</span>,</span><br><span class="line">    <span class="string">"value"</span>:<span class="string">"VyX6zAHse: New message comming!"</span></span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<h2 id="State-Handler-Class"><a href="#State-Handler-Class" class="headerlink" title="State Handler Class"></a>State Handler Class</h2><blockquote>
+<p>TODO</p>
+</blockquote>
+
+    
+    <div class="footer">
+      Caught a mistake or want to contribute to the documentation?
+      <a href="https://github.com/gamestdio/colyseus-website/blob/master/src/docs/room-state.md" target="_blank">
+        Edit this page on Github!
+      </a>
+    </div>
+</div>
+
+                
+            </div>
+            <script src="//cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script>
+            <script src="/colyseus/js/smooth-scroll.min.js"></script>
+            <script src="/colyseus/js/common.js"></script>
+        
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                FastClick.attach(document.body);
+            }, false);
+        </script>
+    </body>
+</html>
