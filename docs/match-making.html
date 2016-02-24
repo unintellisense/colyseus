@@ -142,9 +142,9 @@
 
     <p>Colyseus right now provides the simplest match-making system you’d expect.</p>
 <p><img src="http://www.gliffy.com/go/publish/image/10069321/L.png" alt="Match-making Diagram"></p>
-<p>As you’ve seen in <a href="registering-rooms">registering rooms</a> section, you can<br>register as many room handlers as you want, possibly having custom options when<br>initializing them.</p>
-<p>The server will always try to instantiate a new room in case the client couldn’t<br>join in any of the existing rooms.</p>
-<p>Each room you register on the server may implement the <code>(bool) requestJoin(options)</code><br>method, which will receive the join request options from the client. This method<br>may accept or not the new client is joining in, by returning a boolean value.</p>
+<p>As you’ve seen in <a href="registering-rooms">registering rooms</a> section, you can register as many room handlers as you want, possibly having custom options when initializing them.</p>
+<p>The server will always try to instantiate a new room in case the client couldn’t join in any of the existing rooms.</p>
+<p>Each room you register on the server may implement the <code>(bool) requestJoin(options)</code> method, which will receive the join request options from the client. This method may accept or not the new client is joining in, by returning a boolean value.</p>
 <p><strong>Example</strong>: Allowing only 10 clients to connect on ChatRoom</p>
 <figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChatRoom</span> <span class="keyword">extends</span> <span class="title">Room</span> </span>&#123;</span><br><span class="line">  requestJoin(options) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.clients.length &lt; <span class="number">10</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
