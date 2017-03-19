@@ -271,23 +271,24 @@ section .platforms ul li a.corona:hover {
   background-position: bottom;
 }
 section .projects {
+  margin-bottom: 8vh;
   display: block;
 }
-section .projects a {
+section .projects > a {
   border: 4px solid #787879;
   padding: 0;
   display: block;
   margin-top: 2vh;
   margin-bottom: 2vh;
 }
-section .projects a img {
+section .projects > a img {
   width: 100%;
   height: auto;
   display: block;
   padding: 0;
   margin: 0;
 }
-section .projects a:hover {
+section .projects > a:hover {
   border-color: #fff;
 }
 footer {
