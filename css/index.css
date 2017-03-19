@@ -277,6 +277,8 @@ section .projects a {
   border: 4px solid #787879;
   padding: 0;
   display: block;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
 }
 section .projects a img {
   width: 100%;
