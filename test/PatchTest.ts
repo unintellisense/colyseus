@@ -12,9 +12,10 @@ describe('Patch', function() {
   })
 
   describe('patch interval', function() {
-      var room = new DummyRoom({ })
-      assert.equal("object", typeof((<any>room)._patchInterval))
-      assert.equal(1000 / 20, (<any>room)._patchInterval._idleTimeout, "default patch rate should be 20")
+      let room = new DummyRoom();
+      room.setPatchRate(1000 / 20);
+      assert.equal("object", typeof((<any>room)._patchInterval));
+      assert.equal(1000 / 20, (<any>room)._patchInterval._idleTimeout, "should have patch rate set");
   })
 
   describe('simulation interval', function() {
@@ -30,7 +31,7 @@ describe('Patch', function() {
 
   describe('#sendState', function() {
     it('should allow null and undefined values', function() {
-      let room = new DummyRoom({ });
+      let room = new DummyRoom();
       let client = createDummyClient();
 
       room.setState({ n: null, u: undefined });

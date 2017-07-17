@@ -10,18 +10,24 @@ import { Client } from "./index";
 import { Protocol } from "./Protocol";
 import { logError, spliceOne, toJSON } from "./Utils";
 
-export abstract class Room<T> extends EventEmitter {
+import { debugPatch } from "./Debug";
+
+export abstract class Room<T=any> extends EventEmitter {
 
   public clock: ClockTimer = new ClockTimer();
   public timeline?: Timeline;
 
-  public roomId: number;
+  public roomId: string;
   public roomName: string;
 
   public clients: Client[] = [];
-  public options: any;
+
+  public maxClients: number = Infinity;
+  public patchRate: number = 1000 / 20; // Default patch rate is 20fps (50ms)
+  public autoDispose: boolean = true;
 
   public state: T;
+  public options: any;
 
   // when a new user connects, it receives the '_previousState', which holds
   // the last binary snapshot other users already have, therefore the patches
@@ -32,27 +38,24 @@ export abstract class Room<T> extends EventEmitter {
   private _simulationInterval: NodeJS.Timer;
   private _patchInterval: number;
 
-  private _delayedMessage: { client: Client, data: any }[] = [];
+  constructor () {
+    super();
 
-  constructor(options: any = {}) {
-    super()
+    if (arguments.length > 0) {
+      console.warn("DEPRECATION WARNING: use 'onInit(options)' instead of 'constructor(options)' to initialize the room.");
+    }
 
-    this.roomId = options.roomId;
-    this.roomName = options.roomName;
-
-    this.options = options;
-
-    // Default patch rate is 20fps (50ms)
-    this.setPatchRate(1000 / 20);
+    this.setPatchRate(this.patchRate);
   }
 
-  abstract onMessage(client: Client, data: any): void;
-  abstract onJoin(client: Client, options?: any): void;
-  abstract onLeave(client: Client): void;
-  abstract onDispose(): void;
+  abstract onInit (options: any): void;
+  abstract onMessage (client: Client, data: any): void;
+  abstract onJoin (client: Client, options?: any): void;
+  abstract onLeave (client: Client): void;
+  abstract onDispose (): void;
 
-  public requestJoin(options: any): boolean {
-    return true;
+  public requestJoin (options: any): number | boolean {
+    return 1;
   }
 
   public setSimulationInterval(callback: Function, delay: number = 1000 / 60): void {
@@ -169,19 +172,18 @@ export abstract class Room<T> extends EventEmitter {
       this.broadcast(msgpack.encode([Protocol.ROOM_STATE_PATCH, this.roomId, patches]));
     }
 
-    // send any pending delayed messages
-    for (let i = this._delayedMessage.length - 1; i >= 0; i--) {
-      this.send(this._delayedMessage[i].client, this._delayedMessage[i].data);
-    }
-    // clear the pending message list
-    this._delayedMessage.length = 0;
+    debugPatch("'%s' (%d) is broadcasting patch: %d bytes", this.roomName, this.roomId, patches.length);
+
+    // broadcast patches (diff state) to all clients,
+    // even if nothing has changed in order to calculate PING on client-side
+    return this.broadcast( msgpack.encode([ Protocol.ROOM_STATE_PATCH, this.roomId, patches ]) );
   }
 
   private _onJoin(client: Client, options?: any): void {
     this.clients.push(client);
 
     // confirm room id that matches the room name requested to join
-    client.send(msgpack.encode([Protocol.JOIN_ROOM, this.roomId, this.roomName]), { binary: true }, logError.bind(this));
+    client.send( msgpack.encode( [Protocol.JOIN_ROOM, client.sessionId] ), { binary: true }, logError.bind(this) );
 
     // send current state when new client joins the room
     if (this.state) {
@@ -193,23 +195,36 @@ export abstract class Room<T> extends EventEmitter {
     }
   }
 
-  private _onLeave(client: Client, isDisconnect: boolean = false): void {
-    // remove client from client list
-    spliceOne(this.clients, this.clients.indexOf(client));
+  private _onLeave (client: Client, isDisconnect: boolean = false): void {
+    // Remove client from client list
+    if (!spliceOne(this.clients, this.clients.indexOf(client))) {
+      // skip if the client already left.
+      return;
+    }
 
     if (this.onLeave) this.onLeave(client);
 
     this.emit('leave', client, isDisconnect);
 
+    //
+    // TODO: force disconnect from server.
+    //
+    // need to check why the connection is being re-directed to MatchMaking
+    // process after calling `client.close()` here
+    //
     if (!isDisconnect) {
       client.send(msgpack.encode([Protocol.LEAVE_ROOM, this.roomId]), { binary: true }, logError.bind(this));
     }
 
     // custom cleanup method & clear intervals
-    if (this.clients.length == 0) {
-      if (this.onDispose) this.onDispose();
-      if (this._patchInterval) clearInterval(this._patchInterval);
-      if (this._simulationInterval) clearInterval(this._simulationInterval);
+    if ( this.clients.length == 0 && this.autoDispose ) {
+      if ( this.onDispose ) this.onDispose();
+      if ( this._patchInterval ) clearInterval( this._patchInterval );
+      if ( this._simulationInterval ) clearInterval( this._simulationInterval );
+
+      // clear all timeouts/intervals + force to stop ticking
+      this.clock.clear();
+      this.clock.stop();
 
       this.emit('dispose');
     }
