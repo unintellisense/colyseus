@@ -37,6 +37,7 @@ export abstract class Room<T=any> extends EventEmitter {
 
   private _simulationInterval: NodeJS.Timer;
   private _patchInterval: number;
+  private _delayedMessage: { client: Client, data: any }[] = [];
 
   constructor () {
     super();
@@ -101,8 +102,12 @@ export abstract class Room<T=any> extends EventEmitter {
     this.emit('unlock');
   }
 
-  public send (client: Client, data: any): void {
-    client.send( msgpack.encode( [Protocol.ROOM_DATA, this.roomId, data] ), { binary: true }, logError.bind(this) );
+  public send (client: Client, data: any, delay?: boolean): void {
+    if (!delay){
+      client.send( msgpack.encode( [Protocol.ROOM_DATA, this.roomId, data] ), { binary: true }, logError.bind(this) );
+    } else {
+      this._delayedMessage.push({ client: client, data: data });
+    }
   }
 
   public broadcast (data: any): boolean {
@@ -168,6 +173,15 @@ export abstract class Room<T=any> extends EventEmitter {
 
     debugPatch("'%s' (%d) is broadcasting patch: %d bytes", this.roomName, this.roomId, patches.length);
 
+    if (this._delayedMessage.length){
+      // send any pending delayed messages
+      for (let i = this._delayedMessage.length - 1; i >= 0; i--) {
+        this.send(this._delayedMessage[i].client, this._delayedMessage[i].data);
+      }
+      // clear the pending message list
+      this._delayedMessage.length = 0;
+    }
+    
     // broadcast patches (diff state) to all clients,
     // even if nothing has changed in order to calculate PING on client-side
     return this.broadcast( msgpack.encode([ Protocol.ROOM_STATE_PATCH, this.roomId, patches ]) );
