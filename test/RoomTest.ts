@@ -9,9 +9,9 @@ import {
   DummyRoomWithState
 } from "./utils/mock";
 
-describe('Room', function() {
+describe('Room', function () {
 
-  describe('#constructor', function() {
+  describe('#constructor', function () {
 
     it('should instantiate with valid options', function() {
       var room = new DummyRoom();
@@ -64,10 +64,11 @@ describe('Room', function() {
       var client = createDummyClient();
 
       (<any>room)._onJoin(client);
-      assert.equal(typeof((<any>room)._patchInterval._repeat), "number");
+      assert.equal(typeof ((<any>room)._patchInterval._repeat), "number");
 
-      room.on('dispose', function() {;
-        assert.equal(typeof((<any>room)._patchInterval._repeat), "object");
+      room.on('dispose', function () {
+        ;
+        assert.equal(typeof ((<any>room)._patchInterval._repeat), "object");
         done();
       });
 
@@ -95,7 +96,7 @@ describe('Room', function() {
       (<any>room).sendState(client);
 
 
-      var message = msgpack.decode( client.messages[1] );
+      var message = msgpack.decode(client.messages[1]);
 
       assert.equal(message[0], Protocol.ROOM_STATE);
       assert.deepEqual(message[2], { success: true });
@@ -128,17 +129,15 @@ describe('Room', function() {
       (<any>room)._onJoin(client2, {});
 
       // set state
-      room.setState({one: 1});
-      assert.deepEqual({one: 1}, room.state);
+      room.setState({ one: 1 });
+      assert.deepEqual({ one: 1 }, room.state);
 
-      // clean state. no patches available!
-      assert.equal(false, (<any>room).broadcastPatch());
+      (<any>room).broadcastPatch();
 
       // change the state to make patch available
       room.state.one = 111;
 
-      // voila!
-      assert.equal(true, (<any>room).broadcastPatch());
+      (<any>room).broadcastPatch();
     });
 
     it('shouldn\'t broadcast clean state (no patches)', function() {
@@ -152,17 +151,17 @@ describe('Room', function() {
       var client2 = createDummyClient();
       (<any>room)._onJoin(client2, {});
 
-      assert.deepEqual({one: 1}, room.state);
+      assert.deepEqual({ one: 1 }, room.state);
 
       // clean state. no patches available!
-      assert.equal(false, (<any>room).broadcastPatch());
+      (<any>room).broadcastPatch();
 
       // change the state to make patch available
       room.state.two = 2;
-      assert.deepEqual({one: 1, two: 2}, room.state);
+      assert.deepEqual({ one: 1, two: 2 }, room.state);
 
-      // voila!
-      assert.equal(true, (<any>room).broadcastPatch());
+
+      (<any>room).broadcastPatch();
 
       assert.equal(client.messages.length, 3);
       assert.equal(client2.messages.length, 3);
@@ -180,7 +179,7 @@ describe('Room', function() {
       assert.equal(message[0], Protocol.ROOM_STATE_PATCH);
       assert.deepEqual(message[2].length, 22);
 
-      assert.deepEqual(message[2], [ 66, 10, 66, 58, 130, 163, 111, 110, 101, 1, 163, 116, 119, 111, 2, 49, 86, 53, 49, 74, 89, 59 ]);
+      assert.deepEqual(message[2], [66, 10, 66, 58, 130, 163, 111, 110, 101, 1, 163, 116, 119, 111, 2, 49, 86, 53, 49, 74, 89, 59]);
     });
   });
 
