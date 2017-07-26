@@ -47,7 +47,7 @@ export abstract class Room<T> extends EventEmitter {
   }
 
   abstract onMessage(client: Client, data: any): void;
-  abstract onJoin(client: Client, options?: any): void;
+  abstract onJoin(client: Client, options?: any): Promise<void>;
   abstract onLeave(client: Client): void;
   abstract onDispose(): void;
 
