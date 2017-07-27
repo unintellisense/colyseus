@@ -18,7 +18,7 @@ export declare abstract class Room<T> extends EventEmitter {
     private _delayedMessage;
     constructor(options?: any);
     abstract onMessage(client: Client, data: any): void;
-    abstract onJoin(client: Client, options?: any): void;
+    abstract onJoin(client: Client, options?: any): Promise<void>;
     abstract onLeave(client: Client): void;
     abstract onDispose(): void;
     requestJoin(options: any): boolean;

@@ -24,9 +24,9 @@ export class Server extends EventEmitter {
   protected matchMaker: MatchMaker = new MatchMaker();
 
   // room references by client id
-  protected clients: {[id: string]: Room<any>[]} = {};
+  protected clients: { [id: string]: Room<any>[] } = {};
 
-  constructor (options?: ServerOptions) {
+  constructor(options?: ServerOptions) {
     super();
 
     if (options) {
@@ -37,7 +37,7 @@ export class Server extends EventEmitter {
   /**
    * Attaches Colyseus server to a server or port.
    */
-  public attach (options: ServerOptions) {
+  public attach(options: ServerOptions) {
     if (options.server || options.port) {
       this.server = new WebSocketServer(options);
 
@@ -57,7 +57,7 @@ export class Server extends EventEmitter {
    *    server.register("area_2", AreaHandler, { map_file: "area2.json" })
    *    server.register("area_3", AreaHandler, { map_file: "area3.json" })
    */
-  public register (name: string, handler: Function, options?: any) {
+  public register(name: string, handler: Function, options?: any) {
     this.matchMaker.addHandler(name, handler, options);
   }
 
@@ -65,21 +65,21 @@ export class Server extends EventEmitter {
     let clientId = shortid.generate();
 
     client.id = clientId;
-    client.send( msgpack.encode([ Protocol.USER_ID, clientId ]), { binary: true } );
+    client.send(msgpack.encode([Protocol.USER_ID, clientId]), { binary: true });
 
     client.on('message', this.onMessage.bind(this, client));
     client.on('error', this.onError.bind(this, client));
     client.on('close', this.onDisconnect.bind(this, client));
 
-    this.clients[ clientId ] = [];
+    this.clients[clientId] = [];
     this.emit('connect', client);
   }
 
-  private onError (client: Client, e: any) {
+  private onError(client: Client, e: any) {
     console.error("[ERROR]", client.id, e);
   }
 
-  private onMessage (client: Client, data: any) {
+  private onMessage(client: Client, data: any) {
     let message;
 
     // try to decode message received from client
@@ -93,7 +93,7 @@ export class Server extends EventEmitter {
 
     this.emit('message', client, message);
 
-    if (typeof(message[0]) === "number" && message[0] == Protocol.JOIN_ROOM) {
+    if (typeof (message[0]) === "number" && message[0] == Protocol.JOIN_ROOM) {
       this.onJoinRoomRequest(client, message[1], message[2], (err: string, room: Room<any>) => {
         if (err) {
           let roomId = (room) ? room.roomId : message[1];
@@ -102,33 +102,32 @@ export class Server extends EventEmitter {
         }
       });
 
-    } else if (typeof(message[0]) === "number" && message[0] == Protocol.LEAVE_ROOM) {
+    } else if (typeof (message[0]) === "number" && message[0] == Protocol.LEAVE_ROOM) {
       // trigger onLeave directly to specific room
-      let room = this.matchMaker.getRoomById( message[1] );
+      let room = this.matchMaker.getRoomById(message[1]);
       if (room) (<any>room)._onLeave(client);
 
-    } else if (typeof(message[0]) === "number" && message[0] == Protocol.ROOM_DATA) {
+    } else if (typeof (message[0]) === "number" && message[0] == Protocol.ROOM_DATA) {
       // send message directly to specific room
-      let room = this.matchMaker.getRoomById( message[1] );
+      let room = this.matchMaker.getRoomById(message[1]);
       if (room) room.onMessage(client, message[2]);
 
     } else {
-      this.clients[ client.id ].forEach(room => room.onMessage(client, message));
+      this.clients[client.id].forEach(room => room.onMessage(client, message));
     }
   }
 
-  private onJoinRoomRequest ( client: Client, roomToJoin: number | string, clientOptions: any, callback: (err: string, room: Room<any>) => any): void {
+  private async onJoinRoomRequest(client: Client, roomToJoin: number | string, clientOptions: any, callback: (err: string, room: Room<any>) => any) {
     var room: Room<any>;
     let err: string;
 
-    if (typeof(roomToJoin)==="string") {
-      room = this.matchMaker.joinOrCreateByName(client, roomToJoin, clientOptions || {});
-
+    if (typeof (roomToJoin) === "string") {
+      room = await this.matchMaker.joinOrCreateByName(client, roomToJoin, clientOptions || {});
     } else {
       room = this.matchMaker.joinById(client, roomToJoin, clientOptions);
     }
 
-    if ( room ) {
+    if (room) {
       try {
         (<any>room)._onJoin(client, clientOptions);
 
@@ -138,7 +137,7 @@ export class Server extends EventEmitter {
       }
 
       room.once('leave', this.onClientLeaveRoom.bind(this, room));
-      this.clients[ client.id ].push( room );
+      this.clients[client.id].push(room);
 
     } else {
       err = "join_request_fail";
@@ -152,19 +151,19 @@ export class Server extends EventEmitter {
       return true;
     }
 
-    var roomIndex = this.clients[ client.id ].indexOf(room);
+    var roomIndex = this.clients[client.id].indexOf(room);
     if (roomIndex >= 0) {
-      spliceOne(this.clients[ client.id ], roomIndex);
+      spliceOne(this.clients[client.id], roomIndex);
     }
   }
 
-  private onDisconnect (client) {
+  private onDisconnect(client) {
     this.emit('disconnect', client);
 
     // send leave message to all connected rooms
-    this.clients[ client.id ].forEach(room => (<any>room)._onLeave(client, true));
+    this.clients[client.id].forEach(room => (<any>room)._onLeave(client, true));
 
-    delete this.clients[ client.id ];
+    delete this.clients[client.id];
   }
 
 }
