@@ -72,7 +72,7 @@ export class MatchMaker {
   }
 
   public create(client: Client, roomName: string, clientOptions: any): Promise<Room<any>> {
-    let room = null
+    let room: Room<any> = null
       , handler = this.handlers[roomName][0]
       , options = this.handlers[roomName][1];
 
@@ -84,22 +84,24 @@ export class MatchMaker {
 
     room = new handler(merge(clientOptions, options));
 
-    // imediatelly ask client to join the room
-    if (room.requestJoin(clientOptions)) {
-      room.on('lock', this.lockRoom.bind(this, roomName, room));
-      room.on('unlock', this.unlockRoom.bind(this, roomName, room));
-      room.once('dispose', this.disposeRoom.bind(this, roomName, room));
+    return room.onInit().then(() => {
 
-      this.roomsById[room.roomId] = room;
+      // ask client to join the room once initialized
+      if (room.requestJoin(clientOptions)) {
+        room.on('lock', this.lockRoom.bind(this, roomName, room));
+        room.on('unlock', this.unlockRoom.bind(this, roomName, room));
+        room.once('dispose', this.disposeRoom.bind(this, roomName, room));
 
-      // room always start unlocked
-      this.unlockRoom(roomName, room);
+        this.roomsById[room.roomId] = room;
 
-    } else {
-      room = null;
-    }
+        // room always start unlocked
+        this.unlockRoom(roomName, room);
 
-    return room;
+      } else {
+        room = null;
+      }
+      return room;
+    });
   }
 
   private lockRoom(roomName: string, room: Room<any>): void {

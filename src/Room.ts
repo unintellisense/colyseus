@@ -46,6 +46,8 @@ export abstract class Room<T> extends EventEmitter {
     this.setPatchRate(1000 / 20);
   }
 
+  abstract onInit(): Promise<void>;
+
   abstract onMessage(client: Client, data: any): void;
   abstract onJoin(client: Client, options?: any): Promise<void>;
   abstract onLeave(client: Client): void;

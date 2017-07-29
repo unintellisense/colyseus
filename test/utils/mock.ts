@@ -11,20 +11,20 @@ export class Client extends EventEmitter {
   public id: string;
   public messages: Array<any> = [];
 
-  constructor (id?: string) {
+  constructor(id?: string) {
     super();
     this.id = id || null;
   }
 
-  send (message) {
+  send(message) {
     this.messages.push(message);
   }
 
-  get lastMessage () {
-    return msgpack.decode(this.messages[ this.messages.length - 1 ]);
+  get lastMessage() {
+    return msgpack.decode(this.messages[this.messages.length - 1]);
   }
 
-  close () {
+  close() {
     this.messages = [];
     // this.emit('close');
   }
@@ -35,28 +35,31 @@ export function createEmptyClient(): any {
   return new Client()
 }
 
-export function createDummyClient (): any {
+export function createDummyClient(): any {
   return new Client(shortid.generate())
 }
 
 export class DummyRoom extends Room<any> {
-  requestJoin (options) {
+  requestJoin(options) {
     return !options.invalid_param
   }
 
-  onDispose() {}
-  onJoin() {}
-  onLeave() {}
-  onMessage() {}
+  onDispose() { }
+  onJoin() { return Promise.resolve(); }
+  onLeave() { }
+  onMessage() { }
+  onInit() { return Promise.resolve(); }
 }
 
 export class RoomWithError extends Room<any> {
-  onDispose() {}
+  onDispose() { }
   onJoin() {
     (<any>this).iHaveAnError();
+    return Promise.resolve();
   }
-  onLeave() {}
-  onMessage() {}
+  onLeave() { }
+  onMessage() { }
+  onInit() { return Promise.resolve(); }
 }
 
 
@@ -65,14 +68,15 @@ export class DummyRoomWithState extends Room<any> {
     super(options);
     this.setState({ number: 10 });
   }
-  requestJoin (options) {
+  requestJoin(options) {
     return !options.invalid_param;
   }
 
-  onDispose() {}
-  onJoin() {}
-  onLeave() {}
-  onMessage() {}
+  onDispose() { }
+  onJoin() { return Promise.resolve(); }
+  onLeave() { }
+  onMessage() { }
+  onInit() { return Promise.resolve(); }
 }
 
 export class DummyRoomWithTimeline extends Room<any> {
@@ -80,12 +84,13 @@ export class DummyRoomWithTimeline extends Room<any> {
     super(options)
     this.useTimeline()
   }
-  requestJoin (options) {
+  requestJoin(options) {
     return !options.invalid_param
   }
 
-  onDispose() {}
-  onJoin() {}
-  onLeave() {}
-  onMessage() {}
+  onDispose() { }
+  onJoin() { return Promise.resolve(); }
+  onLeave() { }
+  onMessage() { }
+  onInit() { return Promise.resolve(); }
 }
