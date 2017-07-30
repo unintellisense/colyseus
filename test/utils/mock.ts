@@ -40,6 +40,13 @@ export function createDummyClient(): any {
 }
 
 export class DummyRoom extends Room<any> {
+
+  constructor(state?: any) {
+    super();
+    if (state) {
+      this.setState(state);
+    }
+  }
   requestJoin(options) {
     return !options.invalid_param
   }
@@ -48,7 +55,9 @@ export class DummyRoom extends Room<any> {
   onJoin() { return Promise.resolve(); }
   onLeave() { }
   onMessage() { }
-  onInit() { return Promise.resolve(); }
+  onInit() {
+    return Promise.resolve();
+  }
 }
 
 export class RoomWithError extends Room<any> {

@@ -4,7 +4,7 @@ import { Room } from "../src/Room";
 import { createDummyClient, DummyRoom } from "./utils/mock";
 
 describe('MatchMaker', function () {
-  let matchMaker;
+  let matchMaker: MatchMaker;
 
   before(function () {
     matchMaker = new MatchMaker()
@@ -36,16 +36,19 @@ describe('MatchMaker', function () {
 
     it('shouldn\'t create room when trying to join room with invalid params', function () {
       var client = createDummyClient()
-      var room = matchMaker.joinOrCreateByName(client, 'dummy_room', { invalid_param: 10 })
-      assert.equal(room, null)
+      matchMaker.joinOrCreateByName(client, 'dummy_room', { invalid_param: 10 })
+        .then(room => {
+          assert.equal(room, null)
+        })
     });
 
     it('should throw error when trying to join existing room by id with invalid params', function () {
       var client1 = createDummyClient()
       var client2 = createDummyClient()
 
-      var room = matchMaker.joinOrCreateByName(client1, 'room', {})
-      assert.equal(matchMaker.joinById(client2, room.roomId, { invalid_param: 1 }), undefined);
+      matchMaker.joinOrCreateByName(client1, 'room', {}).then(room => {
+        assert.equal(matchMaker.joinById(client2, room.roomId, { invalid_param: 1 }), undefined);
+      })
     });
 
     it('should join existing room on joinById', function () {
@@ -54,12 +57,14 @@ describe('MatchMaker', function () {
       var client1 = createDummyClient()
       var client2 = createDummyClient()
 
-      var room = matchMaker.joinOrCreateByName(client1, 'dummy_room', {})
-      var joiningRoom = matchMaker.joinById(client2, room.roomId, {})
+      matchMaker.joinOrCreateByName(client1, 'dummy_room', {})
+        .then(room => {
+          var joiningRoom = matchMaker.joinById(client2, room.roomId, {})
 
-      assert.equal(true, matchMaker.hasAvailableRoom('dummy_room'))
-      assert.equal('dummy_room', room.roomName)
-      assert.equal(room.roomId, joiningRoom.roomId)
+          assert.equal(true, matchMaker.hasAvailableRoom('dummy_room'))
+          assert.equal('dummy_room', room.roomName)
+          assert.equal(room.roomId, joiningRoom.roomId)
+        })
     });
 
   });

@@ -86,7 +86,7 @@ describe('Room', function () {
 
   describe('#sendState', function () {
     it('should send state when it is set up', function () {
-      let room = new DummyRoom({});
+      let room = new DummyRoom({ success: true });
       let client = createDummyClient();
       (<any>room)._onJoin(client, {});
 
@@ -104,8 +104,8 @@ describe('Room', function () {
   });
 
   describe('#broadcastPatch', function () {
-    it('should fail to broadcast patch without state', function () {
-      let room = new DummyRoom({});
+    it('should fail to broadcast patch without state', function (done) {
+      let room = new DummyRoom();
 
       // connect 2 dummy clients into room
       let client1 = createDummyClient();
@@ -113,9 +113,12 @@ describe('Room', function () {
 
       let client2 = createDummyClient();
       (<any>room)._onJoin(client2, {});
+      setTimeout(() => {
+        assert.equal(undefined, room.state);
+        assert.throws(() => { (<any>room).broadcastPatch(); });
+        done();
+      }, 100)
 
-      assert.equal(undefined, room.state);
-      assert.throws(() => { (<any>room).broadcastPatch(); });
     });
 
     it('should broadcast patch having state', function () {
