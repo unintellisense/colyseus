@@ -27,7 +27,7 @@ export class MatchMaker {
     return this.roomsById[roomId];
   }
 
-  public joinById(client: Client, roomId: number, clientOptions: any): Room<any> {
+  public joinById(client: Client, roomId: number, clientOptions?: any): Room<any> {
     let room = this.roomsById[roomId];
 
     if (!room) {

@@ -12,18 +12,38 @@
       "args": [
         "${relativeFile}"
       ],
-      "cwd": "${workspaceRoot}",      
+      "cwd": "${workspaceRoot}",
       "protocol": "inspector"
     },
     {
-    "name": "Current TS Tests File",
-    "type": "node",
-    "protocol" : "inspector",
-    "request": "launch",
-    "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-    "stopOnEntry": false,
-    "args": [ "--compilers", "ts:ts-node/register", "--no-timeouts", "${relativeFile}"],
-    "cwd": "${workspaceRoot}"
+      "name": "All TS Tests",
+      "type": "node",
+      "protocol": "inspector",
+      "request": "launch",
+      "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+      "stopOnEntry": false,
+      "args": [
+        "--compilers",
+        "ts:ts-node/register",
+        "--no-timeouts",
+        "./test/**/*Test.ts"
+      ],
+      "cwd": "${workspaceRoot}"
+    },
+    {
+      "name": "Current TS Tests File",
+      "type": "node",
+      "protocol": "inspector",
+      "request": "launch",
+      "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+      "stopOnEntry": false,
+      "args": [
+        "--compilers",
+        "ts:ts-node/register",
+        "--no-timeouts",
+        "${relativeFile}"
+      ],
+      "cwd": "${workspaceRoot}"
     }
   ]
 }
