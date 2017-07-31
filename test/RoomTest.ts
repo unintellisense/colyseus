@@ -20,6 +20,7 @@ describe('Room', function () {
 
     it('should instantiate with timeline attribute', function () {
       var room = new DummyRoomWithTimeline({});
+      clearInterval(room['_patchInterval']);
       assert.equal(0, room.timeline.history.length);
     });
 
@@ -27,7 +28,7 @@ describe('Room', function () {
 
   describe('#onJoin/#onLeave', function () {
     it('should receive onJoin/onLeave messages', function () {
-      var room = new DummyRoom({});
+      var room = new DummyRoom();
       var client = createDummyClient();
       var message = null;
 
@@ -106,7 +107,8 @@ describe('Room', function () {
   describe('#broadcastPatch', function () {
     it('should fail to broadcast patch without state', function (done) {
       let room = new DummyRoom();
-
+      // hack so we can call room.broadcastPatch directly and catch it with mocha
+      clearInterval(room['_patchInterval']);
       // connect 2 dummy clients into room
       let client1 = createDummyClient();
       (<any>room)._onJoin(client1, {});
