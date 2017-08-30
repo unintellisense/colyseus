@@ -16,6 +16,7 @@ export declare abstract class Room<T> extends EventEmitter {
     private _simulationInterval;
     private _patchInterval;
     private _delayedMessage;
+    private _delayedBroadCast;
     constructor(options?: any);
     abstract onInit(): Promise<void>;
     abstract onMessage(client: Client, data: any): void;
@@ -30,7 +31,7 @@ export declare abstract class Room<T> extends EventEmitter {
     lock(): void;
     unlock(): void;
     send(client: Client, data: any, delay?: boolean): void;
-    broadcast(data: any): boolean;
+    broadcast(data: any, delay?: boolean): boolean;
     disconnect(): void;
     protected sendState(client: Client): void;
     private broadcastPatch();

@@ -9,7 +9,7 @@ export declare class MatchMaker {
     hasHandler(roomName: string): boolean;
     hasAvailableRoom(roomName: string): boolean;
     getRoomById(roomId: number): Room<any>;
-    joinById(client: Client, roomId: number, clientOptions: any): Room<any>;
+    joinById(client: Client, roomId: number, clientOptions?: any): Room<any>;
     joinOrCreateByName(client: Client, roomName: string, clientOptions: any): Promise<Room<any>>;
     requestJoin(client: Client, roomName: string, clientOptions: any): Room<any>;
     create(client: Client, roomName: string, clientOptions: any): Promise<Room<any>>;
