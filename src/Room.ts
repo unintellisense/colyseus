@@ -33,6 +33,7 @@ export abstract class Room<T> extends EventEmitter {
   private _patchInterval: number;
 
   private _delayedMessage: { client: Client, data: any }[] = [];
+  private _delayedBroadCast: any[] = [];
 
   constructor(options: any = {}) {
     super()
@@ -108,22 +109,19 @@ export abstract class Room<T> extends EventEmitter {
     }
   }
 
-  public broadcast(data: any): boolean {
-    // no data given, try to broadcast patched state
-    if (!data) {
-      throw new Error("Room#broadcast: 'data' is required to broadcast.");
-    }
-
+  public broadcast(data: any, delay?: boolean): boolean {
     // encode all messages with msgpack
     if (!(data instanceof Buffer)) {
       data = msgpack.encode([Protocol.ROOM_DATA, this.roomId, data]);
     }
-
-    var numClients = this.clients.length;
-    while (numClients--) {
-      this.clients[numClients].send(data, { binary: true }, logError.bind(this));
+    if (!delay) {
+      var numClients = this.clients.length;
+      while (numClients--) {
+        this.clients[numClients].send(data, { binary: true }, logError.bind(this));
+      }
+    } else {
+      this._delayedBroadCast.push(data);
     }
-
     return true;
   }
 
@@ -171,6 +169,18 @@ export abstract class Room<T> extends EventEmitter {
       this.broadcast(msgpack.encode([Protocol.ROOM_STATE_PATCH, this.roomId, patches]));
     }
 
+    // broadcast any delayed broadcasts
+    if (this._delayedBroadCast.length) {
+
+      var numClients = this.clients.length;
+      while (numClients--) {
+        let numMessages = this._delayedBroadCast.length;
+        while (numMessages--) {
+          this.clients[numClients].send(this._delayedBroadCast[numMessages], { binary: true }, logError.bind(this));
+        }
+      }
+      this._delayedBroadCast.length = 0;
+    }
     // send any pending delayed messages
     for (let i = this._delayedMessage.length - 1; i >= 0; i--) {
       this.send(this._delayedMessage[i].client, this._delayedMessage[i].data);
